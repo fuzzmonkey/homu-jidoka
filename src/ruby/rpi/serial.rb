@@ -8,17 +8,19 @@ parity = SerialPort::NONE
 
 sp = SerialPort.new(port_str, baud_rate, data_bits, stop_bits, parity)
 
-puts 'connected to /dev/ttyAMA0'
+puts "connected to #{port_str}"
 
 while true do
-  while (i = sp.gets.chomp) do       # see note 2
+  while (i = sp.gets.chomp) do
     puts "raw msg: #{i}"
-    message_ar = i.split(" ").map{|c| c.to_i}
-    node_id = message_ar.slice!(0)
-    values = []
 
-    message_ar.each_with_index do |char,i|
-      value = char[i] + 256 * char[i+1]
+    message_ar = i.split(" ").map{|c| c.to_i}
+    node_id = message_ar[0]
+    values = []
+    message_index = (1..message_ar.size-1).step(2).to_a
+
+    message_index.each do |i|
+      value = message_ar[i] + 256 * message_ar[i+1].to_i
       value -= 65536 if value > 32768
       values << value
     end
